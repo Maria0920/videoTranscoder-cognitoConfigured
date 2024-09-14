@@ -1,306 +1,268 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Check if the user is already logged in
-    const token = localStorage.getItem('token');
-    if (token) {
-        showMainContent();
-    } else {
-        showLoginPage();
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  const token = localStorage.getItem("token");
+  if (token && isValidToken(token)) {
+    showMainContent(); // Show main content if token exists and is valid
+  } else {
+    showLoginPage(); // Show login page if no token or invalid token
+  }
+
+  // Add event listener to the logout button
+  document.querySelector(".logout-button").addEventListener("click", logout);
 });
 
-function showLoginPage() {
-    // Display the login page and hide the main content
-    document.getElementById('loginPage').style.display = 'block';
-    document.getElementById('mainContent').style.display = 'none';
+function isValidToken(token) {
+  // Implement your token validation logic here
+  // For example, make an API call to check if the token is valid
+  return true; // Replace with actual token validation
+}
 
-    // Update the browser URL to the login page
-    history.pushState(null, "Login", "/login");
+function showLoginPage() {
+  document.getElementById("loginPage").style.display = "block";
+  document.getElementById("mainContent").style.display = "none";
+  history.pushState(null, "Login", "/login");
 }
 
 function showMainContent() {
-    const username = localStorage.getItem('username');
-    document.getElementById('profileSection').querySelector('h2').textContent = `Welcome, ${username}!`;
+  const username = localStorage.getItem("username");
+  document
+    .getElementById("profileSection")
+    .querySelector("h2").textContent = `Welcome, ${username}!`;
 
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-
-    // Load the default page (Your Videos) and the video list
-    showPage('videosList');
-    loadFiles();
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("mainContent").style.display = "block";
+  showPage("videosList");
+  loadFiles();
 }
-function login() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
 
-    // Authenticate the user
-    fetch('/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+function login() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  fetch("/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  })
+    .then((response) => {
+      if (response.ok) return response.json();
+      throw new Error("Login failed");
     })
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error('Login failed');
-        }
+    .then((data) => {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", username);
+      showMainContent(); // Redirect to the main content page
     })
-    .then(data => {
-        localStorage.setItem('token', data.token); // Store the token
-        localStorage.setItem('username', username); // Store the username
-        showMainContent(); // Display the main content
+    .catch((error) => {
+      console.error("Login error:", error);
+      alert("An error occurred during login");
+    });
+}
+
+function signup() {
+  const username = document.getElementById("signupUsername").value;
+  const password = document.getElementById("signupPassword").value;
+
+  fetch("/auth/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  })
+    .then((response) => {
+      if (response.ok) return response.json();
+      throw new Error("Signup failed");
     })
-    .catch(error => {
-        console.error('Login error:', error);
-        alert('An error occurred during login');
+    .then((data) => {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", username);
+      showMainContent(); // Redirect to the main content page
+    })
+    .catch((error) => {
+      console.error("Signup error:", error);
+      alert("An error occurred during signup");
     });
 }
 
 function showPage(pageId) {
-    // Hide all sections and show the selected one
-    const sections = document.querySelectorAll('.page-section');
-    sections.forEach(section => {
-        section.style.display = 'none'; // Hide all sections
-    });
-
-    const selectedSection = document.getElementById(pageId);
-    if (selectedSection) {
-        selectedSection.style.display = 'block'; // Show the selected section
-    }
-
-    // Update the browser URL without reloading the page
-    history.pushState(null, pageId, `/${pageId}`);
+  document.querySelectorAll(".page-section").forEach((section) => {
+    section.style.display = "none";
+  });
+  const selectedSection = document.getElementById(pageId);
+  if (selectedSection) selectedSection.style.display = "block";
+  history.pushState(null, pageId, `/${pageId}`);
 }
 
-// Handle the back/forward buttons in the browser
-window.addEventListener('popstate', (event) => {
-    const path = window.location.pathname.replace('/', '');
-    if (path) {
-        showPage(path);
-    } else {
-        showPage('videosList'); // Default page
-    }
+window.addEventListener("popstate", () => {
+  const path = window.location.pathname.replace("/", "");
+  showPage(path || "videosList");
 });
 
 async function loadFiles() {
-    try {
-        const response = await fetch('/files', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-
-        if (response.ok) {
-            const files = await response.json();
-            renderFileList(files);
-        } else {
-            alert('Failed to load files');
-        }
-    } catch (error) {
-        console.error('Load files error:', error);
-        alert('An error occurred while loading files');
+  try {
+    const response = await fetch("/files", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    if (response.ok) {
+      const files = await response.json();
+      renderFileList(files);
+    } else {
+      alert("Failed to load files");
     }
+  } catch (error) {
+    console.error("Load files error:", error);
+    alert("An error occurred while loading files");
+  }
 }
 
 function renderFileList(files) {
-    const fileList = document.getElementById('fileList');
-    fileList.innerHTML = ''; // Clear the existing list
+  const fileList = document.getElementById("fileList");
+  fileList.innerHTML = "";
+  files.forEach((file) => {
+    const div = document.createElement("div");
+    div.classList.add("file-item");
 
-    files.forEach(file => {
-        // Create and populate the file list with thumbnails and buttons
-        const div = document.createElement('div');
-        div.classList.add('file-item');
+    const fileNameWithoutExtension = file.filename
+      .split(".")
+      .slice(0, -1)
+      .join(".");
 
-        const fileNameWithoutExtension = file.filename.split('.').slice(0, -1).join('.');
-        const img = document.createElement('img');
-        img.src = `/thumbnails/${fileNameWithoutExtension}.png`; 
-        img.alt = file.filename;
-        img.classList.add('thumbnail');
+    const img = document.createElement("img");
+    img.src = `/thumbnails/${fileNameWithoutExtension}.png`;
+    img.alt = file.filename;
+    img.classList.add("thumbnail");
 
-        const filename = document.createElement('div');
-        filename.textContent = file.filename;
+    const filename = document.createElement("div");
+    filename.textContent = file.filename;
 
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
-        deleteButton.classList.add('delete-button'); // Add the delete button class
-        deleteButton.onclick = () => deleteFile(file.id);
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.classList.add("delete-button");
+    deleteButton.onclick = () => deleteFile(file.id);
 
-        const downloadButton = document.createElement('button');
-        downloadButton.textContent = 'Download';
-        downloadButton.classList.add('download-button'); // Add the download button class
-        downloadButton.onclick = () => downloadFile(file.id, file.filename);
+    const downloadButton = document.createElement("button");
+    downloadButton.textContent = "Download";
+    downloadButton.classList.add("download-button");
+    downloadButton.onclick = () => downloadFile(file.id, file.filename);
 
-        div.appendChild(img);
-        div.appendChild(filename);
-        div.appendChild(deleteButton);
-        div.appendChild(downloadButton);
+    div.appendChild(img);
+    div.appendChild(filename);
+    div.appendChild(deleteButton);
+    div.appendChild(downloadButton);
 
-        fileList.appendChild(div);
+    fileList.appendChild(div);
 
-        // Option element for the "Transcode Video" dropdown
-        const option = document.createElement('option');
-        option.value = file.id; // or file.filename if needed
-        option.textContent = file.filename;
-
-        // Option to the dropdown
-        videoSelect.appendChild(option);
-    });
+    const option = document.createElement("option");
+    option.value = file.id;
+    option.textContent = file.filename;
+    document.getElementById("videoSelect").appendChild(option);
+  });
 }
 
 async function deleteFile(fileId) {
-    if (!confirm('Are you sure you want to delete this file?')) return;
+  if (!confirm("Are you sure you want to delete this file?")) return;
 
-    try {
-        const response = await fetch(`/files/${fileId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-
-        if (response.ok) {
-            alert('File deleted successfully');
-            loadFiles(); // Reload the files after deletion
-        } else {
-            alert('Failed to delete file');
-        }
-    } catch (error) {
-        console.error('Delete file error:', error);
-        alert('An error occurred while deleting the file');
+  try {
+    const response = await fetch(`/files/${fileId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    if (response.ok) {
+      alert("File deleted successfully");
+      loadFiles();
+    } else {
+      alert("Failed to delete file");
     }
+  } catch (error) {
+    console.error("Delete file error:", error);
+    alert("An error occurred while deleting the file");
+  }
+}
+
+function downloadFile(fileId, filename) {
+  const a = document.createElement("a");
+  a.href = `/files/${fileId}/download`;
+  a.download = filename;
+  a.click();
 }
 
 async function uploadVideo() {
-    const video = document.getElementById('videoUpload').files[0];
-    const formData = new FormData();
-    formData.append('video', video);
+  const fileInput = document.getElementById("videoUpload");
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("Please select a file to upload");
+    return;
+  }
 
-    try {
-        const response = await fetch('/files/upload', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-            body: formData
-        });
+  const formData = new FormData();
+  formData.append("video", file);
 
-        if (response.ok) {
-            alert('Upload successful');
-            loadFiles(); // Reload files after upload
-        } else {
-            alert('Upload failed');
-        }
-    } catch (error) {
-        console.error('Upload error:', error);
-        alert('An error occurred during upload');
+  try {
+    const response = await fetch("/files/upload", {
+      method: "POST",
+      body: formData,
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    if (response.ok) {
+      alert("Video uploaded successfully");
+      loadFiles();
+    } else {
+      alert("Failed to upload video");
     }
-}
-async function downloadFile(fileId, filename) {
-    try {
-        console.log(`Starting download for fileId: ${fileId}, filename: ${filename}`);
-        const response = await fetch(`/files/download/${fileId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        // Debugging: Log the status of the response
-        console.log(`Response status: ${response.status}`);
-
-        if (!response.ok) {
-            throw new Error('File download failed');
-        }
-
-        // Convert the response to a Blob
-        const blob = await response.blob();
-
-        // Create a download link and trigger it
-        const downloadLink = document.createElement('a');
-        downloadLink.href = URL.createObjectURL(blob);
-        downloadLink.download = filename; // The name of the file to save
-
-        // Append the link to the document and trigger the click event
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-
-        // Clean up the DOM by removing the download link
-        document.body.removeChild(downloadLink);
-        console.log(`File download initiated for: ${filename}`);
-
-    } catch (error) {
-        console.error('Download error:', error);
-        alert('An error occurred during the file download');
-    }
+  } catch (error) {
+    console.error("Upload video error:", error);
+    alert("An error occurred while uploading the video");
+  }
 }
 
 async function startTranscoding() {
-    const videoId = document.getElementById('videoSelect').value;
+  const videoId = document.getElementById("videoSelect").value;
+  if (!videoId) {
+    alert("Please select a video to transcode");
+    return;
+  }
 
-    // Reference the progress bar element
-    const progressBar = document.getElementById('progress-bar');
-    progressBar.value = 0; 
-    progressBar.style.display = 'none'; // Ensure it's hidden initially
-
-    try {
-        // Establish WebSocket connection to receive progress updates
-        const ws = new WebSocket('ws://localhost:3000');
-
-        ws.onopen = async () => {
-            console.log('WebSocket connection established');
-
-            // Now send the request to initiate transcoding once WebSocket is ready
-            const response = await fetch(`/videos/transcode/${videoId}`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-
-            if (response.ok) {
-                alert('Transcoding initiated');
-                progressBar.style.display = 'block'; // Show the progress bar when transcoding starts
-
-                // Inform the server about starting transcoding
-                ws.send(JSON.stringify({ action: 'startTranscoding', videoId: videoId }));
-            } else {
-                alert('Transcoding failed');
-                ws.close();
-            }
-        };
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-
-            if (data.progress) {
-                console.log(`Progress update received: ${data.progress}%`);
-                progressBar.value = data.progress; // Update progress bar value
-            } else if (data.finished) {
-                alert('Transcoding completed successfully!');
-                progressBar.style.display = 'none'; // Hide the progress bar
-                loadFiles();
-                ws.close();
-            } else if (data.error) {
-                alert(`Error during transcoding: ${data.error}`);
-                progressBar.style.display = 'none'; // Hide the progress bar
-                ws.close();
-            }
-        };
-
-        ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            alert('An error occurred while receiving progress updates.');
-            progressBar.style.display = 'none'; // Hide the progress bar
-            ws.close();
-        };
-
-        ws.onclose = () => {
-            console.log('WebSocket connection closed');
-        };
-
-    } catch (error) {
-        console.error('Transcoding error:', error);
-        alert('An error occurred during transcoding');
+  try {
+    const response = await fetch(`/transcode/${videoId}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    if (response.ok) {
+      const progressBar = document.getElementById("progress-bar");
+      progressBar.style.display = "block";
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        const progress = JSON.parse(decoder.decode(value)).progress;
+        progressBar.value = progress;
+      }
+      alert("Transcoding complete");
+    } else {
+      alert("Failed to start transcoding");
     }
+  } catch (error) {
+    console.error("Transcoding error:", error);
+    alert("An error occurred while transcoding the video");
+  }
 }
 
 function logout() {
-    // Remove the user's token and username from localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+  // Clear localStorage to remove user data
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
 
-    // Redirect to the login page
-    showLoginPage();
+  // Close any WebSocket connection if needed
+  closeWebSocket();
+
+  // Redirect to index.html (login page)
+  window.location.href = "index.html";
+}
+
+function closeWebSocket() {
+  // Assuming `ws` is your WebSocket variable. Adjust if necessary.
+  if (typeof ws !== "undefined" && ws.readyState === WebSocket.OPEN) {
+    ws.close();
+  }
 }

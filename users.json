@@ -1,7 +1,43 @@
 [
-    { "username": "test", "password": "test" },
-    { "username": "Nico", "password": "Nico" },
-    { "username": "Abc", "password": "test" },
-    { "username": "user4", "password": "password4" },
-    { "username": "user5", "password": "password5" }
+  {
+    "username": "test",
+    "password": "test"
+  },
+  {
+    "username": "Nico",
+    "password": "Nico"
+  },
+  {
+    "username": "Abc",
+    "password": "test"
+  },
+  {
+    "username": "user4",
+    "password": "password4"
+  },
+  {
+    "username": "user5",
+    "password": "password5"
+  },
+  {},
+  {
+    "username": "anna",
+    "email": "anna@gmail.com",
+    "password": "anna"
+  },
+  {
+    "username": "saki",
+    "email": "saki.endo@connect.qut.edu.au",
+    "password": "saki"
+  },
+  {
+    "username": "Emma",
+    "email": "Emma@gmail.com",
+    "password": "Emma"
+  },
+  {
+    "username": "endo",
+    "email": "saki.endo@connect.qut.edu.au",
+    "password": "endo"
+  }
 ]
