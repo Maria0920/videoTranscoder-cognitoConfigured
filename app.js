@@ -4,10 +4,14 @@ import fileUpload from "express-fileupload";
 import path from "path";
 import { fileURLToPath } from "url";
 import "dotenv/config";
-import http from "http"; // Import HTTP module
+import http from "http";
 import { WebSocketServer } from "ws";
 import { initDb } from "./utils/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import fileRoutes from "./routes/fileRoutes.js";
+import videoRoutes from "./routes/videoRoutes.js";
 
+// Initialize Database
 initDb()
   .then(() => {
     console.log("Database initialized");
@@ -19,22 +23,19 @@ initDb()
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize express app
 const app = express();
 const port = 3000;
 
-const server = http.createServer(app); // Create an HTTP server with Express
-
-// Create a WebSocket server on top of the HTTP server
+// Create HTTP server and WebSocket server
+const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 export { wss };
 
-// Handle WebSocket connections
 wss.on("connection", (ws) => {
   console.log("New WebSocket connection established");
 
-  ws.on("send", (message) => {
+  ws.on("message", (message) => {
     console.log("Received message from client:", message);
   });
 
@@ -47,15 +48,12 @@ wss.on("connection", (ws) => {
   });
 });
 
-// Serve static files from 'public' directory
+// Middleware setup
+app.use(express.json());
+app.use(fileUpload());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Import routes
-import authRoutes from "./routes/authRoutes.js";
-import fileRoutes from "./routes/fileRoutes.js";
-import videoRoutes from "./routes/videoRoutes.js";
-
-// Setup session
+// Session configuration
 const SECRET_KEY = process.env.SECRET_KEY;
 app.use(
   session({
@@ -65,22 +63,17 @@ app.use(
   })
 );
 
-// Middleware
-app.use(express.json());
-app.use(fileUpload());
-app.use(express.static(path.join(__dirname, "public"))); // Ensure static files are served
+// Route handlers
+app.use("/auth", authRoutes); // Authentication routes
+app.use("/files", fileRoutes); // File handling routes
+app.use("/videos", videoRoutes); // Video handling routes
 
-// Use routes
-app.use("/auth", authRoutes);
-app.use("/files", fileRoutes);
-app.use("/videos", videoRoutes);
-
-// Serve signup.html separately if needed
+// Serve signup page (if necessary)
 app.get("/signup", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "signup.html"));
 });
 
-// Serve index.html for all other routes (SPA catch-all)
+// Serve index.html for other routes
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -92,7 +85,7 @@ app.get("/logout", (req, res) => {
       console.error("Error destroying session:", err);
       return res.status(500).send("Error logging out");
     }
-    res.redirect("/"); // Redirect to login page
+    res.redirect("/");
   });
 });
 

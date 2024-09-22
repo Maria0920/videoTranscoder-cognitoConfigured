@@ -39,5 +39,40 @@
     "username": "endo",
     "email": "saki.endo@connect.qut.edu.au",
     "password": "endo"
+  },
+  {
+    "username": "aki",
+    "email": "saki.endo@connect.qut.edu.au",
+    "password": "aaaa"
+  },
+  {
+    "username": "admin",
+    "email": "saki.endo@connect.qut.edu.au",
+    "password": "1234"
+  },
+  {
+    "username": "Matt",
+    "email": "saki.endo@connect.qut.edu.au",
+    "password": "1111"
+  },
+  {
+    "username": "nova",
+    "email": "saki.endo@connect.qut.edu.au",
+    "password": "1111"
+  },
+  {
+    "username": "Make",
+    "email": "saki.endo@connect.qut.edu.au",
+    "password": "Tinkers1anc@"
+  },
+  {
+    "username": "Mi",
+    "email": "saki.endo@connect.qut.edu.au",
+    "password": "1111"
+  },
+  {
+    "username": "Dave",
+    "email": "saki.endo@connect.qut.edu.au",
+    "password": "1111"
   }
 ]

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Confirmation</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="confirmation-box">
+        <h1>Code Confirmation</h1>
+        <p>Please enter the code sent to your email/phone:</p>
+
+        <!-- Code confirmation form -->
+        <form id="codeForm" action="/auth/confirm-code" method="POST">
+          <div class="form-group">
+            <label for="code">Code:</label>
+            <input type="text" id="code" name="code" required />
+          </div>
+
+          <button type="submit">Confirm Code</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Include custom JS file to handle code confirmation -->
+    <script src="./js/api.js"></script>
+  </body>
+</html>

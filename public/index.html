@@ -16,7 +16,8 @@
       <div id="loginPage" class="page-section active">
         <h1>Welcome to Video Transcoding App</h1>
         <p>Please log in to continue</p>
-        <form id="loginForm">
+        <div id="errorMessage" style="color: red"></div>
+        <form id="loginForm" onsubmit="event.preventDefault(); login();">
           <div class="form-group">
             <label for="username">Username</label>
             <input
@@ -35,7 +36,7 @@
               required
             />
           </div>
-          <button type="button" onclick="login()">Login</button>
+          <button type="submit">Login</button>
         </form>
         <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
       </div>

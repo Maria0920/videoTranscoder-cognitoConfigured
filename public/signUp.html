@@ -10,6 +10,8 @@
     <div class="container">
       <div class="login-box">
         <h1>Sign Up</h1>
+
+        <!-- Sign-up form -->
         <form id="signupForm" action="/auth/signup" method="POST">
           <div class="form-group">
             <label for="username">Username:</label>
@@ -38,9 +40,13 @@
 
           <button type="submit">Sign Up</button>
         </form>
+
+        <!-- Link to the login page -->
         <p>Already have an account? <a href="login.html">Login here</a></p>
       </div>
     </div>
+
+    <!-- Include custom JS file to handle sign-up and TOTP verification -->
     <script src="./js/api.js"></script>
   </body>
 </html>
